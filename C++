@@ -1,0 +1,55 @@
+/*******************************************************************************
+* RoboCore Kit Iniciante V8 - 14. Projeto Missão Impossível 2
+* Aciona um alarme semelhante ao som de uma sirene de polícia quando há luz.
+*******************************************************************************/
+
+// Declaração dos pinos dos componentes
+const int pinoLDR = A0;        // Pino do sensor LDR
+const int pinoBuzzer = 9;      // Pino do buzzer
+const int pinoBotao = 8;       // Pino do botão 
+
+// Variáveis gerais
+int leituraLDR = 0;            // Variável para armazenar a leitura do LDR
+int leituraBotao;              // Variável para armazenar a leitura do botão
+int estadoBuzzer = 0;          // Estado do buzzer (0 = desligado, 1 = ligado)
+int estadoBotaoAnterior = HIGH;// Estado anterior do botão
+int frequencia = 1000;         // Frequência inicial da sirene
+
+void setup() {
+  // Configura os pinos
+  pinMode(pinoLDR, INPUT);         // Configura o pino do LDR como entrada
+  pinMode(pinoBuzzer, OUTPUT);     // Configura o pino do buzzer como saída
+  pinMode(pinoBotao, INPUT_PULLUP);// Configura o pino do botão como entrada com pull-up interno
+}
+
+void loop() {
+  // Lê o valor de tensão no pino do LDR
+  leituraLDR = analogRead(pinoLDR);
+  
+  // Lê o estado atual do botão
+  leituraBotao = digitalRead(pinoBotao);
+  
+  // Se o botão for pressionado (transição de HIGH para LOW)
+  if (leituraBotao == LOW && estadoBotaoAnterior == HIGH) {
+    estadoBuzzer = !estadoBuzzer; // Alterna o estado do buzzer
+    delay(50); // Debounce para evitar múltiplas leituras
+  }
+
+  // Atualiza o estado anterior do botão
+  estadoBotaoAnterior = leituraBotao;
+
+  // Lógica para controlar o estado do buzzer
+  if (estadoBuzzer == 1 && leituraLDR > 512) {
+    // Alterna a frequência entre dois valores para criar o efeito de sirene
+    if (frequencia == 1000) {
+      frequencia = 1500; // Frequência mais alta
+    } else {
+      frequencia = 1000; // Frequência mais baixa
+    }
+    tone(pinoBuzzer, frequencia); // Aciona o buzzer com a frequência atual
+  } else {
+    noTone(pinoBuzzer); // Desliga o buzzer se o estado for 0 ou não houver luz
+  }
+
+  delay(250); // Aguarda 250 milissegundos antes de mudar a frequência
+}
